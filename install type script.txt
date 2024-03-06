@@ -1,0 +1,28 @@
+install type script
+npm install -g typescript
+
+crate a index.html file in pproj dir
+type html 5
+add this line
+
+<script src = "app.js" defer></script>
+
+below title
+
+now create package.json file
+
+npm init
+
+npm install --save-dev lite-server
+
+in package.json add this line below test in scripts
+
+"start" : "lite-server"
+
+now type
+
+npm start 
+
+a localhost 3000 server is created
+
+now we can directly see the output of the typescript files
