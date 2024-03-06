@@ -1,11 +1,17 @@
-function add(n1 : number , n2 : number) {
-    return n1 + n2;
+let userInput : unknown
+let username : string
+
+userInput = 5
+userInput ='Yukinon'
+
+if(typeof userInput === 'string'){
+    username = userInput
 }
 
-function printResult(num:number) : void {
-    console.log(`Result: ${num}`);
+//username = userInput // throws error
+
+function generateError(message : string , code: number): never{
+    throw {message : message, errorCode: code}
 }
 
-printResult(add(5,25));
-
-//let someVal : undefined;
+generateError('An error occured !', 500)

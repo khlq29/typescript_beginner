@@ -1,7 +1,12 @@
-function add(n1, n2) {
-    return n1 + n2;
+var userInput;
+var username;
+userInput = 5;
+userInput = 'Yukinon';
+if (typeof userInput === 'string') {
+    username = userInput;
 }
-function printResult(num) {
-    console.log("Result: ".concat(num));
+//username = userInput // throws error
+function generateError(message, code) {
+    throw { message: message, errorCode: code };
 }
-printResult(add(5, 25));
+generateError('An error occured !', 500);
