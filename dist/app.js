@@ -1,27 +1,35 @@
 "use strict";
-class Department {
-    id;
+let add;
+add = (n1, n2) => {
+    return n1 + n2;
+};
+console.log(add(69, 69));
+let greet;
+greet = {
+    name: 'Yukinon',
+    greet(phrase) {
+        console.log(`${phrase} i am ${this.name}`);
+    }
+};
+greet.greet(`hello there `);
+class Person {
     name;
-    employees = [];
-    constructor(id, name) {
-        this.id = id;
-        this.name = name;
+    age = 17;
+    constructor(n) {
+        if (n) {
+            this.name = n;
+        }
     }
-    describe() {
-        console.log(`department ${this.id}: ${this.name}`);
-    }
-    addEmployee(employee) {
-        this.employees.push(employee);
-    }
-    printEmployeeInfo() {
-        console.log(this.employees.length);
-        console.log(this.employees);
+    greet(phrase) {
+        if (this.name) {
+            console.log(`${phrase} i am ${this.name}`);
+        }
+        else {
+            console.log('Hi!');
+        }
     }
 }
-const accounting = new Department("d1", "Accounting");
-accounting.addEmployee(`Yukinon`);
-accounting.addEmployee('Senadina');
-accounting.describe();
-accounting.printEmployeeInfo();
-accounting.name = 'new name';
+let usr1 = new Person();
+usr1.greet("hi there");
+console.log(usr1);
 //# sourceMappingURL=app.js.map
