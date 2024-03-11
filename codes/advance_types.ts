@@ -166,7 +166,7 @@ interface ErrorContainer{ //{email: 'NOt a valid email' , username: 'Must star w
 
 const errorBag : ErrorContainer = {
     email: 'Not a valid email',  //since prop is set as string it only takes string values
-    username: 'Must star with a capital character!'
+    username: 'Must start with a capital character!'
 }
 
 

@@ -1,129 +1,96 @@
-//decorators
-/**
- * 
- *Decorators are like special instructions you write above your class, method, property, or parameter.
- *These instructions tell TypeScript what extra things to do with that part of your code when it's being compiled.
- *They let you add extra features, change behavior, or gather information about your code without changing the code itself.
- * 
- */
+//Project Type
+enum ProjectStatus {Active, Finished}
 
-// function Logger(constructor : Function) {
-//     console.log("Logging ....");
-//     console.log(constructor);
-// }
+class Project{
+    constructor(
+        public id: string,
+        public title: string,
+        public description: string,
+        public people: number,
+        public status: ProjectStatus
+    ) {
 
-function Logger(logString : string) {
-    console.log('LOGGER FACTORY');
-    return function(constructor : Function){
-    console.log(logString);
-    console.log(constructor);  
+        
     }
 }
 
-function WithTempate(template : string, hookId : string){
-    console.log('TEMPLATE FACTORY');
-    return function<T extends {new(...args: any[]):{name:string}}>(originalConstructor: T) {
-          return class extends originalConstructor {
-            constructor(...args: any[]){
-                super();
-                console.log('Rendering template ....');
-                const hookEl = document.getElementById(hookId)
-                
-                if(hookEl){
-                  hookEl.innerHTML = template;
-                  hookEl.querySelector('h1')!.textContent = this.name;
-                }
-            }
-          }
+
+//Project State Management
+
+type Listener<T> = (items:T[]) => void
+
+class State <T> {
+    protected listeners: Listener<T>[] = []
+    
+    addListener(listenerFn : Listener<T>) {
+        this.listeners.push(listenerFn)
+    }
+}
+class ProjectState extends State<Project>{
+    private projects: Project[] = []
+    private static instance: ProjectState
+    
+    private constructor() { 
+        super()
+    }
+    
+    static getInstance() {
+        if (this.instance) {
+            return this.instance
+        }
+        this.instance = new ProjectState()
+        return this.instance
+    }
+
+    addProject(title: string, description : string, numOfPeople: number) {
+        const newProject = new Project(Math.random().toString(), title , description, numOfPeople , ProjectStatus.Active)
+        this.projects.push(newProject)
+        for (const listenerFn of this.listeners) {
+            listenerFn(this.projects.slice())
+        }
     }
 }
 
-//can add multiple decorators
+const projectState = ProjectState.getInstance()
 
-@Logger('LOGGING _ PERSON')
-@WithTempate('<h1>My Person Object</h1>','app')
-class Person{
-    name = "Yukinon"
+//Validation
+interface Validatable{
+    value?: string | number;
+    required?: boolean;
+    minLength?: number
+    maxLength?: number
+    min?: number
+    max?: number
+}
 
-    constructor(){
-        console.log('Creating person object...');
+function validate(validatableInput: Validatable) {
+    let isValid = true;
+    if (validatableInput.required) {
+        isValid = isValid && validatableInput.value?.toString().trim().length !== 0
     }
-
-}
-
-const pers = new Person()
-console.log(pers);
-
-//property decorator
-
-function Log(target : any, propertyName : string | symbol){
-    console.log('Property decorator');
-    console.log(target,propertyName);
-
-}
-
-function Log2(target : any, name : string, descriptor: PropertyDescriptor){
-    console.log('Accessor decorator!');
-    console.log(target)
-    console.log(name)
-    console.log(descriptor)
-
-}
-
-function Log3(
-    target : any, 
-    name : string, 
-    descriptor: PropertyDescriptor
-    ){
-    console.log('Method decorator!');
-    console.log(target)
-    console.log(name)
-    console.log(descriptor)
-
-}
-
-function Log4(target : any, name : string, position : number){
-    console.log('Parameter decorator!');
-    console.log(target)
-    console.log(name)
-    console.log(position)
-
-}
-
-
-class Product{
-    @Log
-    title:string;
-    private _price:number
-
-    @Log2
-    set price(val:number){
-        if(val > 0) {this._price =val}
-        else { throw new Error('invalid price - should be positive')}
+    if (validatableInput.minLength != null && typeof validatableInput.value === 'string') {
+        isValid = isValid && validatableInput.value.length >= validatableInput.minLength
     }
-
-    constructor(t:string, p:number){
-        this.title = t
-        this._price = p
+    if (validatableInput.maxLength != null && typeof validatableInput.value === 'string') {
+        isValid = isValid && validatableInput.value.length <= validatableInput.maxLength
     }
-
-    @Log3
-    getPriceWithTax(@Log4 tax: number){
-        return this._price * (1+tax)
+    if (validatableInput.min != null && typeof validatableInput.value === 'number') {
+        isValid = isValid && validatableInput.value >= validatableInput.min
     }
+    if (validatableInput.max != null && typeof validatableInput.value === 'number') {
+        isValid = isValid && validatableInput.value <= validatableInput.max
+    }
+    return isValid
 }
 
-const b1 = new Product('book 1', 23)
-const b2 = new Product('book 2', 1000)
-console.log(b1);
-console.log(b2);
 
+//autobind decorator
 
 function Autobind(target : any, methodName : string, descriptor: PropertyDescriptor){
     const originalMethod = descriptor.value
     const adjDescriptor : PropertyDescriptor = {
         configurable: true,
-        enumerable : false,
+        //enumerable : false,
         get(){
             const boundFn = originalMethod.bind(this)
             return boundFn
@@ -132,64 +99,164 @@ function Autobind(target : any, methodName : string, descriptor: PropertyDescrip
     return adjDescriptor
 }
 
-class Printer{
-    message = 'Yukinon'
+//Component Base Class
+
+abstract class Component<T extends HTMLElement, U extends HTMLElement > {
+    templateElement: HTMLTemplateElement
+    hostElement: T
+    element: U
+
+    constructor(
+        templateId: string,
+        hostElementId: string,
+        insertAtStart: boolean, 
+        newELementId?: string
+    ) {
+        this.templateElement = <HTMLTemplateElement> document.getElementById(templateId)!;
+        this.hostElement = document.getElementById(hostElementId)! as T
+
+        const importedNode = document.importNode(this.templateElement.content, true)
+        this.element = importedNode.firstElementChild as U
+        if (newELementId) {
+            this.element.id = newELementId
+        }
+        this.attach(insertAtStart)
+    }
+
+    private attach(insertAtBeginning : boolean) {
+        this.hostElement.insertAdjacentElement(insertAtBeginning ? 'afterbegin' : 'beforeend', this.element)
+    }
+
+    abstract configure(): void
+    abstract renderContent(): void
+}
+
+
+//ProjectList class
+
+class ProjectList extends Component< HTMLDivElement ,HTMLElement > {
+    assignedProjects: Project[]
+
+    constructor(private type: 'active' | 'finished') {
+        super('project-list', 'app' , false ,`${type}-projects`)
+        this.assignedProjects = []
+        this.element.id = `${this.type}-projects`
+
+        this.configure()
+        this.renderContent()
+    }
+
+    configure() {
+        projectState.addListener((projects: Project[]) => {
+            const relevantProjects = projects.filter(prj => {
+                if (this.type === 'active') {
+                   return prj.status === ProjectStatus.Active 
+                }
+                return prj.status === ProjectStatus.Finished
+            });
+            this.assignedProjects = relevantProjects
+            this.renderProject()
+        })
+    }
+
+    renderContent() {
+        const listId = `${this.type}-projects-list`
+        this.element.querySelector('ul')!.id = listId
+        this.element.querySelector('h2')!.textContent = this.type.toUpperCase()+ ' PROJECTS'
+    }
+
+     private renderProject() {
+        const listEl = document.getElementById(`${this.type}-projects-list`)! as HTMLUListElement
+        listEl.innerHTML =''
+        for (const prjItem of this.assignedProjects) {
+            const listItem = document.createElement('li')
+            listItem.textContent = prjItem.title
+            listEl?.appendChild(listItem)
+        }
+    }
+}
+
+
+//ProjectInput class
+
+class ProjectInput extends Component<HTMLDivElement, HTMLFormElement> {
+
+    titleInputElement: HTMLInputElement
+    descriptionInputElement: HTMLInputElement
+    peopleInputElement : HTMLInputElement
+
+    constructor() {
+        super('project-input', 'app', true, 'user-input')
+        this.titleInputElement = this.element.querySelector('#title') as HTMLInputElement
+        this.descriptionInputElement = this.element.querySelector('#description') as HTMLInputElement
+        this.peopleInputElement = this.element.querySelector('#people') as HTMLInputElement
+        this.configure()
+    }
+
+    configure() { 
+        this.element.addEventListener('submit', this.submitHandler)
+    }
+
+    renderContent() {}
+
+    private gatherUserInput(): [string, string, number] | void {
+        const enteredTitle = this.titleInputElement.value;
+        const enteredDescription = this.descriptionInputElement.value;
+        const enteredPeople = this.peopleInputElement.value;
+
+
+        const titleValidatable: Validatable = {
+            value: enteredTitle,
+            required: true,
+            // maxLength : 10
+        }
+
+         const descriptionValidatable: Validatable = {
+            value: enteredDescription,
+            required: true,
+            minLength: 5
+        }
+
+         const peopleValidatable: Validatable = {
+            value: +enteredPeople,
+            required: true,
+            min: 1,
+            max: 5
+        }
+
+        if (
+            !validate(titleValidatable) ||
+            !validate(descriptionValidatable) ||
+            !validate(peopleValidatable)
+        ) {
+            alert('Invalid input, please try again!')
+            return;
+        } else {
+            return [enteredTitle , enteredDescription , +enteredPeople]
+        }
+
+    }
+
+    private clearInputs() {
+        this.titleInputElement.value = '';
+        this.descriptionInputElement.value = '';
+        this.peopleInputElement.value = '';
+    }
 
     @Autobind
-    showMessage(){
-        console.log(this.message);
-    }
-}
-const p = new Printer()
-
-const button = document.querySelectorAll('button')!;
-button[1].addEventListener('click', p.showMessage);
-
-//----Validation with decorators
-
-function Required(){
-
-}
-
-function PositiveNumber(){
-
-}
-
-function validate(obj : object){
-
-}
-
-class Course {
-    
-    @Required
-    title : string
-
-    @PositiveNumber
-    price: number
-
-    constructor(t:string, p:number){
-        this.title =t
-        this.price = p
+    private submitHandler(event: Event) {
+        event.preventDefault();
+        const userInput = this.gatherUserInput();
+        //console.log(this.titleInputElement.value);
+        if (Array.isArray(userInput)) {
+            const [title, desc, people] = userInput
+            console.log(title, desc, people);
+            projectState.addProject(title,desc,people)
+            this.clearInputs()
+        }
     }
 }
 
-const courseForm = document.querySelector('form')!;
-courseForm.addEventListener('submit', event => {
-    event.preventDefault();
-    const titleEl = document.getElementById('title') as HTMLInputElement
-    const priceEl = document.getElementById('price') as HTMLInputElement
-
-
-    const title = titleEl.value
-    const price = +priceEl.value
-
-
-    const createdCourse = new Course(title , price);
-
-    if(!validate(createdCourse)){
-        alert('Invalid input, please try again!')
-        return
-    }
-    console.log(createdCourse);
-
-})
+const prjInput = new ProjectInput()
+const activePrjList = new ProjectList('active')
+const finishedPrjList = new ProjectList('finished')
