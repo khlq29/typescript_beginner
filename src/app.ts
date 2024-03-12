@@ -8,9 +8,7 @@ class Project{
         public description: string,
         public people: number,
         public status: ProjectStatus
-    ) {
-
-        
+    ) {    
     }
 }
 
