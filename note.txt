@@ -1,0 +1,44 @@
+setting webpacks
+
+uncomment the line in tsconfig.json 
+//"rootDir": "./src",  
+for using webpacks should have to comment the above
+
+create a file
+ 'webpack.config.js'
+
+remoove all the '.js' extensions in the import
+
+
+add this to file 
+
+const path = require("path");  //node module
+
+module.exports = {           //node module
+  entry: "./src/app.ts",
+  output: {
+    filename: "bundle.js",
+    path: path.resolve(__dirname, "dist"),
+  },
+  devtools: "inline-source-map",
+  module: {
+    rules: [
+      {
+        test: /\.ts$/,
+        use: "ts-loader",
+        exclude: /node_modules/,
+      },
+    ],
+  },
+  resolve: {
+    extensions: [".ts", ".js"],
+  },
+};
+
+"build": "webpack"  //addd this line in package.json
+in concole run npm run build
+
+for running in webpack dev server
+edit this line in package.json
+
+"start": "lite-server",  =====>   "start": "webpack-dev-server",

@@ -1,8 +1,8 @@
-import Cmp from './base-component.js'
-import { Autobind as auto} from '../decorators/autobind.js'  // we can also assign aliase names
-import * as Validation from '../utils/validation.js' //grouping --> we can call the funsctions using the variable name we gave like 'Validation'
+import Cmp from './base-component'
+import { Autobind as auto} from '../decorators/autobind'  // we can also assign aliase names
+import * as Validation from '../utils/validation' //grouping --> we can call the funsctions using the variable name we gave like 'Validation'
 //import { validate } from '../utils/validation.js'
-import { projectState } from '../state/project-state.js'
+import { projectState } from '../state/project-state'
 
 
 
