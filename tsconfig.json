@@ -109,7 +109,8 @@
   "exclude": [
     "codes",
     "resources",
-    "namespace-example"
+    "namespace-example",
+    "src1"
   ],
   // "include": [
   //   "app.ts"
