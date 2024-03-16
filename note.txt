@@ -42,3 +42,15 @@ for running in webpack dev server
 edit this line in package.json
 
 "start": "lite-server",  =====>   "start": "webpack-dev-server",
+
+
+
+in class trsnsformer
+
+uncomment this
+
+ "moduleResolution": "Node",
+
+ // in app.ts
+// using plainToInstance instead of plainToClass
+// with class-transformer v0.5.1+
